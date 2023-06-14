@@ -4,8 +4,8 @@ use std::io::{Error, ErrorKind};
 use tic_tac_toe::*;
 
 fn main() {
+    let difficulty = get_difficulty().unwrap_or(Difficulty::Medium);
     let map_size = get_map_size().unwrap_or(3);
-    let difficulty = get_difficulty().unwrap_or(Difficulty::Easy);
     let mut game = match TicTacToe::build(map_size, difficulty) {
         Ok(g) => g,
         Err(message) => {
@@ -14,7 +14,7 @@ fn main() {
         }
     };
 
-    println!("Welcome to tic tac toe. Here's the map:");
+    println!("Welcome to tic tac toe. Difficulty is {}. Here's the map:", difficulty);
 
     print_map(game.get_map());
 
@@ -86,11 +86,11 @@ fn make_auto_move(game: &mut TicTacToe, is_move_for_x: bool) -> Result<AnalyzeRe
     game.auto_move()
 }
 
-fn get_map_size() -> Option<u8> {
+fn get_difficulty() -> Option<Difficulty> {
     env::args().skip(1).next()?.parse().ok()
 }
 
-fn get_difficulty() -> Option<Difficulty> {
+fn get_map_size() -> Option<u8> {
     env::args().skip(2).next()?.parse().ok()
 }
 

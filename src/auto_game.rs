@@ -1,12 +1,30 @@
 mod easy_strategy;
+mod medium_strategy;
 
 use super::manual_game::{AnalyzeResult, GameStatus, TicTacToeManual};
 use easy_strategy::EasyStrategy;
+use medium_strategy::MediumStrategy;
 
 use std::str::FromStr;
+use std::fmt;
 
-trait TicTacToeStrategy {
-    fn suggest_next_move(&self, game: &TicTacToeManual) -> Result<(u8, u8), String>;
+trait TicTacToeGameReader {
+    fn get_map(&self) -> &Vec<Vec<Option<bool>>>;
+    fn game_status(&self) -> GameStatus;
+}
+
+impl TicTacToeGameReader for TicTacToeManual {
+    fn get_map(&self) -> &Vec<Vec<Option<bool>>> {
+        TicTacToeManual::get_map(self)
+    }
+
+    fn game_status(&self) -> GameStatus {
+        TicTacToeManual::game_status(self)
+    }
+}
+
+trait TicTacToeStrategy<T: TicTacToeGameReader> {
+    fn suggest_next_move(&self, game_reader: &T) -> Result<(u8, u8), String>;
 }
 
 #[derive(PartialEq, Clone, Copy)]
@@ -31,9 +49,20 @@ impl FromStr for Difficulty {
     }
 }
 
+impl fmt::Display for Difficulty {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Difficulty::ManualOnly => write!(f, "Manual Game"),
+            Difficulty::Easy => write!(f, "Easy"),
+            Difficulty::Medium => write!(f, "Medium"),
+            Difficulty::Hard => write!(f, "Hard"),
+        }
+    }
+}
+
 pub struct TicTacToe {
     manual_game: TicTacToeManual,
-    auto_move_strategy: Option<Box<dyn TicTacToeStrategy>>,
+    auto_move_strategy: Option<Box<dyn TicTacToeStrategy<TicTacToeManual>>>,
 }
 
 impl TicTacToe {
@@ -43,7 +72,7 @@ impl TicTacToe {
             auto_move_strategy: match difficulty {
                 Difficulty::ManualOnly => None,
                 Difficulty::Easy => Some(Box::new(EasyStrategy)),
-                Difficulty::Medium => todo!(),
+                Difficulty::Medium => Some(Box::new(MediumStrategy)),
                 Difficulty::Hard => todo!(),
             },
         })

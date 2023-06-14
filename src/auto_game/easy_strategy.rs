@@ -1,15 +1,15 @@
-use super::TicTacToeStrategy;
-use super::super::manual_game::{GameStatus, TicTacToeManual};
+use super::{TicTacToeStrategy,TicTacToeGameReader};
+use super::super::manual_game::{GameStatus};
 use rand::Rng;
 
 pub struct EasyStrategy;
-impl TicTacToeStrategy for EasyStrategy {
-    fn suggest_next_move(&self, game: &TicTacToeManual) -> Result<(u8, u8), String> {
-        if let GameStatus::GameFinished = game.game_status() {
+impl<T: TicTacToeGameReader> TicTacToeStrategy<T> for EasyStrategy {
+    fn suggest_next_move(&self, game_reader: &T) -> Result<(u8, u8), String> {
+        if let GameStatus::GameFinished = game_reader.game_status() {
             return Err(String::from("Game already finished"));
         }
 
-        let map = game.get_map();
+        let map = game_reader.get_map();
 
         let free_cells: Vec<_> = (0..map.len())
             .map(|i| (0..map.len())
